@@ -12,8 +12,6 @@ import editdistance
 import numpy as np
 from scipy import ndimage
 import pylab
-import tensorflow as tf
-from tensorflow import keras
 from keras import backend as K
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Input, Dense, Activation
