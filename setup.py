@@ -20,6 +20,8 @@ REQUIRED = [
     "pydot",
     "Pillow",
     "h5py",
+    "cairocffi",
+    "editdistance",
 ]
 
 
