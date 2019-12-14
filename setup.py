@@ -10,19 +10,20 @@ REQUIRES_PYTHON = ">=3.6.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    "numpy",
-    "scikit-learn",
-    "tqdm",
-    "tensorflow==2.0.0",
-    "keras",
-    "networkx",
-    "pydot",
-    "Pillow",
-    "h5py",
-    "cairocffi",
-    "editdistance",
-]
+REQUIRED = []
+#REQUIRED = [
+#    "numpy",
+#    "scikit-learn",
+#    "tqdm",
+#    "tensorflow==2.0.0",
+#    "keras",
+#    "networkx",
+#    "pydot",
+#    "Pillow",
+#    "h5py",
+#    "cairocffi",
+#    "editdistance",
+#]
 
 
 setup(

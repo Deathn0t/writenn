@@ -19,7 +19,7 @@ from keras.layers import Reshape, Lambda
 from keras.layers.merge import add, concatenate
 from keras.models import Model
 from keras.layers.recurrent import GRU
-from keras.optimizers import SGD
+from keras.optimizers import SGD, RMSprop
 from keras.utils.data_utils import get_file
 from keras.preprocessing import image
 import keras.callbacks
@@ -29,7 +29,7 @@ OUTPUT_DIR = "image_ocr"
 
 # character classes and matching regex filter
 regex = r"^[a-z ]+$"
-alphabet = u"abcdefghijklmnopqrstuvwxyz "
+alphabet = "abcdefghijklmnopqrstuvwxyz "
 
 np.random.seed(55)
 
@@ -298,6 +298,9 @@ class TextImageGenerator(keras.callbacks.Callback):
             "label_length": label_length,
             "source_str": source_str,  # used for visualization only
         }
+        for k, v in inputs.items():
+            print(f"{k}: ", np.shape(v))
+        exit()
         outputs = {"ctc": np.zeros([size])}  # dummy data for dummy loss function
         return (inputs, outputs)
 
@@ -498,6 +501,10 @@ def train(run_name, start_epoch, stop_epoch, img_w):
 
     # Two layers of bidirectional GRUs
     # GRU seems to work as well, if not better than LSTM:
+    #! INPUT SHAPE
+    #! 3D tensor with shape (batch_size, timesteps, input_dim).
+    #! OUTPUT SHAPE
+    #! return_sequences=True: 3D tensor with shape (batch_size, timesteps, units).
     gru_1 = GRU(
         rnn_size, return_sequences=True, kernel_initializer="he_normal", name="gru1"
     )(inner)
@@ -539,7 +546,8 @@ def train(run_name, start_epoch, stop_epoch, img_w):
     )
 
     # clipnorm seems to speeds up convergence
-    sgd = SGD(learning_rate=0.02, decay=1e-6, momentum=0.9, nesterov=True)
+    # sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True)
+    sgd = RMSprop(lr=0.001, rho=0.9)
 
     model = Model(
         inputs=[input_data, labels, input_length, label_length], outputs=loss_out
@@ -552,6 +560,10 @@ def train(run_name, start_epoch, stop_epoch, img_w):
             OUTPUT_DIR, os.path.join(run_name, "weights%02d.h5" % (start_epoch - 1))
         )
         model.load_weights(weight_file)
+    else:
+        print(" == SAVING MODEL == ")
+        file_name = os.path.join(OUTPUT_DIR, "model_gru_test.h5")
+        model.save(file_name)
     # captures output of softmax so we can decode the output during visualization
     test_func = K.function([input_data], [y_pred])
 
@@ -570,7 +582,7 @@ def train(run_name, start_epoch, stop_epoch, img_w):
 
 if __name__ == "__main__":
     run_name = datetime.datetime.now().strftime("%Y:%m:%d:%H:%M:%S")
-    train(run_name, 0, 20, 128)
+    train(run_name, 0, 20, 100)
     # increase to wider images and start at epoch 20.
     # The learned weights are reloaded
-    train(run_name, 20, 25, 512)
+    # train(run_name, 20, 25, 512)
